@@ -10,7 +10,7 @@ RBF-kernel SVC is used to test whether the data needs a nonlinear boundary.
 | File | Purpose |
 |---|---|
 | `svm_breast_cancer.py` | All project code: the from-scratch SVM, preprocessing, training, comparison, and evaluation |
-| `requirements.txt` | Library versions |
+| `requirements.txt` | Required Python libraries and versions |
 
 ## Environment
 
@@ -20,6 +20,11 @@ RBF-kernel SVC is used to test whether the data needs a nonlinear boundary.
 - matplotlib 3.11.2
 
 The dataset is built into scikit-learn, so no download is needed.
+
+## Prerequisites
+
+- Python 3.13 or compatible version
+- pip (Python package installer)
 
 ## How to run
 
@@ -44,3 +49,4 @@ terminal, saves two plots to `figures/` (`loss_curve.png` and
 6. Train scikit-learn's linear SVC with the same C and compare weights and bias
 7. Tune an RBF-kernel SVC with 5-fold cross-validation
 8. Report test accuracy, precision, recall, F1, and confusion matrices
+
