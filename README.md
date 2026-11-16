@@ -50,3 +50,16 @@ terminal, saves two plots to `figures/` (`loss_curve.png` and
 7. Tune an RBF-kernel SVC with 5-fold cross-validation
 8. Report test accuracy, precision, recall, F1, and confusion matrices
 
+## Generated Figures
+
+The program automatically creates a figures/ folder containing:
+- loss_curve.png: Shows how the objective value changes during training.
+- confusion_matrices.png: Compares the classification resutls of all three models on the test set.
+
+## Output
+
+When the program finishes, it displays the evaluation metrics for:
+- Our NumPy LinearSVM
+- Scikit-learn's linear SVC
+- Scikit-learn's RBF-kernel SVC
+The results include accuracy, precision, recall, F1-score, and confusion matrices.
