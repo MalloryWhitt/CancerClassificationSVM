@@ -34,50 +34,6 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 # =============================================================================
 # PART 1: OUR LINEAR SVM, WRITTEN FROM SCRATCH
 # =============================================================================
-#
-# The model
-# ---------
-# A linear SVM learns a weight vector w (one weight per feature) and a bias b.
-# For a sample x, it computes the score
-#
-#     f(x) = w . x + b
-#
-# and predicts benign (+1) if f(x) >= 0, malignant (-1) otherwise.
-# The boundary between the classes is the set of points where f(x) = 0.
-#
-# The objective (what training minimizes)
-# ---------------------------------------
-#     0.5 * ||w||^2  +  C * sum over all training samples of  max(0, 1 - y * f(x))
-#
-#   - 0.5 * ||w||^2 keeps w small. The margin width is 2 / ||w||, so a
-#     smaller w means a wider margin between the two classes.
-#
-#   - max(0, 1 - y * f(x)) is the "hinge loss." The value y * f(x) is
-#     positive when a sample is on the correct side of the boundary and
-#     at least 1 when it is safely outside the margin.
-#       * Safely outside the margin  -> loss is 0 (the sample is ignored)
-#       * Inside the margin or wrong -> loss grows the further it is off
-#
-#   - C controls the tradeoff. A large C punishes mistakes heavily (narrow
-#     margin, fits training data closely). A small C allows more mistakes
-#     in exchange for a wider margin.
-#
-# How training works (gradient descent)
-# -------------------------------------
-# Start with w = 0 and b = 0. On every epoch:
-#   1. Compute y * f(x) for every training sample.
-#   2. Find the "violators": samples with y * f(x) < 1.
-#   3. Compute the gradient (the direction that increases the objective):
-#        dw = w - C * sum of (y * x) over violators
-#        db =   - C * sum of  y      over violators
-#   4. Step the other way: w = w - lr * dw,  b = b - lr * db
-#
-# Samples safely outside the margin do not appear in the gradient at all.
-# Only the samples on or inside the margin (the support vectors) shape the
-# final boundary.
-#
-# This is the same objective scikit-learn's SVC minimizes, so if our code is
-# correct, both should end up with nearly the same w and b.
 
 class LinearSVM:
     def __init__(self, C=1.0, lr=0.001, epochs=1000):
@@ -137,13 +93,6 @@ os.makedirs("figures", exist_ok=True)
 # =============================================================================
 # PART 2: LOAD THE DATA
 # =============================================================================
-# The dataset is built into scikit-learn, so no download is needed.
-#   X: 569 rows (one per biopsy sample) x 30 columns (features)
-#   y: scikit-learn uses 0 = malignant, 1 = benign
-#
-# The SVM math needs labels of -1 and +1, so we map:
-#   0 (malignant) -> -1
-#   1 (benign)    -> +1
 
 print("=" * 60)
 print("PART 2: Load data")
@@ -160,11 +109,6 @@ print(f"Malignant (-1): {(y == -1).sum()}, benign (+1): {(y == 1).sum()}")
 # =============================================================================
 # PART 3: TRAIN/TEST SPLIT
 # =============================================================================
-# 80% of samples are used for training and 20% are held back for testing.
-# The test set is never seen during training, so it shows how the model
-# performs on new patients.
-#
-# stratify=y keeps the malignant/benign ratio the same in both sets.
 
 print("\n" + "=" * 60)
 print("PART 3: Train/test split")
@@ -179,13 +123,6 @@ print(f"Training samples: {len(y_train)}, test samples: {len(y_test)}")
 # =============================================================================
 # PART 4: SCALE THE FEATURES
 # =============================================================================
-# Features have very different ranges. An SVM measures distances, so without
-# scaling, large-valued features like area would dominate small-valued ones
-# like smoothness. Gradient descent also converges poorly on unscaled data.
-#
-# StandardScaler shifts each feature to mean 0 and standard deviation 1.
-# The scaler is fit on the training set only, then applied to both sets,
-# so no information from the test set leaks into training.
 
 print("\n" + "=" * 60)
 print("PART 4: Scale features")
@@ -207,8 +144,6 @@ print("After scaling, every feature has mean 0 and standard deviation 1 "
 # =============================================================================
 # PART 5: TRAIN OUR LINEAR SVM
 # =============================================================================
-# Train our from-scratch model and plot the objective after each epoch.
-# A curve that drops and then flattens shows that gradient descent converged.
 
 print("\n" + "=" * 60)
 print("PART 5: Train our LinearSVM")
@@ -239,13 +174,6 @@ for i in np.argsort(np.abs(ours.w))[::-1][:5]:
 # =============================================================================
 # PART 6: CHECK OUR MODEL AGAINST SCIKIT-LEARN
 # =============================================================================
-# scikit-learn's SVC with kernel="linear" minimizes the same objective, but
-# solves it with a different algorithm (SMO, via the libsvm library).
-# If our implementation is correct, both models should land on nearly the
-# same w and b.
-#
-# Cosine similarity compares the direction of the two weight vectors:
-# 1.0 means they point exactly the same way.
 
 print("\n" + "=" * 60)
 print("PART 6: Compare with scikit-learn's linear SVC")
@@ -267,15 +195,6 @@ print(f"Cosine similarity of weight vectors: {cos_sim:.4f}")
 # =============================================================================
 # PART 7: DOES THE DATA NEED A NONLINEAR BOUNDARY?
 # =============================================================================
-# A linear SVM can only draw a flat boundary. An RBF kernel lets the SVM draw
-# a curved boundary. If RBF clearly beats linear, the data is nonlinear.
-# If they score about the same, a linear SVM is enough.
-#
-# The RBF kernel has two settings, C and gamma (how far each sample's
-# influence reaches). GridSearchCV tries every combination below and picks
-# the best one using 5-fold cross-validation on the training set only:
-# the training set is split into 5 parts, and each part takes a turn as a
-# validation set while the model trains on the other 4.
 
 print("\n" + "=" * 60)
 print("PART 7: Tune an RBF-kernel SVC (nonlinearity check)")
@@ -293,17 +212,6 @@ print(f"Cross-validation accuracy: {grid.best_score_:.3f}")
 # =============================================================================
 # PART 8: EVALUATE ON THE TEST SET
 # =============================================================================
-# Malignant is treated as the "positive" class, since catching cancer is the
-# point of the model.
-#   Accuracy:  share of all test samples classified correctly
-#   Precision: of the samples predicted malignant, how many truly were
-#   Recall:    of the truly malignant samples, how many the model caught
-#              (the most important metric here: a missed cancer is the
-#              costliest mistake)
-#   F1:        a single score that balances precision and recall
-#
-# The confusion matrix shows counts of correct and incorrect predictions
-# for each class.
 
 print("\n" + "=" * 60)
 print(f"PART 8: Test set results ({len(y_test)} samples, "
