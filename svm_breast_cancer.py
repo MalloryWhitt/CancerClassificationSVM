@@ -32,7 +32,7 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 
 
 # =============================================================================
-# PART 1: OUR LINEAR SVM, WRITTEN FROM SCRATCH
+# PART 1: OUR LINEAR SVM
 # =============================================================================
 
 class LinearSVM:
@@ -193,7 +193,7 @@ print(f"Cosine similarity of weight vectors: {cos_sim:.4f}")
 
 
 # =============================================================================
-# PART 7: DOES THE DATA NEED A NONLINEAR BOUNDARY?
+# PART 7: CHECKING A NONLINEAR BOUNDARY
 # =============================================================================
 
 print("\n" + "=" * 60)
